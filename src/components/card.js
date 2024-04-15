@@ -1,5 +1,6 @@
 // card.js
 const profilePopupTypeImage = document.querySelector(".popup_type_image");
+import { openPopup } from "./modal";
 
 export function createCard(data, likeHandler, onDelete) {
   const cardTemplate = document
