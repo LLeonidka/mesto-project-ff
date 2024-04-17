@@ -1,7 +1,7 @@
 // card.js
-import { openPopup, closeActivePopup } from "./modal";
 
-export function createCard(data, likeHandler, onDelete, captionElement) {
+
+export function createCard(data, likeHandler, onDelete, imgHandler) {
   const cardTemplate = document
     .querySelector("#card-template")
     .content.querySelector(".card")
@@ -24,16 +24,24 @@ export function createCard(data, likeHandler, onDelete, captionElement) {
     likeHandler(likeButton);
   });
 
-image.addEventListener("click", () => {
-  openPopup(captionElement);
-  captionElement.querySelector("img").src = data.link;
-  captionElement.querySelector(".popup__caption").textContent = data.name;
-});
+  /*image.addEventListener("click", () => {
+    openPopup(captionElement);
+    captionElement.querySelector("img").src = data.link;
+    captionElement.querySelector(".popup__caption").textContent = data.name;
+  });*/
+
+  image.addEventListener('click',( )=>{
+    imgHandler(data)
+  })
 
   return cardTemplate;
 }
 
+export function onDelete(element) {
+  element.remove();
+}
 
 export function likeHandler(likeButton) {
   likeButton.classList.toggle("card__like-button_is-active");
 }
+

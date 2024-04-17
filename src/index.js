@@ -1,10 +1,11 @@
 // index.js
 import "./pages/index.css";
 import initialCards from "./components/cards.js";
-import { createCard, likeHandler } from "./components/card.js";
-import { openPopup, closeActivePopup } from "./components/modal.js";
+import { createCard, likeHandler, onDelete } from "./components/card.js";
+import { openPopup, closePopup } from "./components/modal.js";
 
-export const profilePopupTypeImage = document.querySelector(".popup_type_image");
+export const profilePopupTypeImage =
+  document.querySelector(".popup_type_image");
 export const popups = document.querySelectorAll(".popup");
 const profilePopupBtn = document.querySelector(".profile__add-button");
 const profilePopup = document.querySelector(".popup_type_new-card");
@@ -14,7 +15,7 @@ const profilePopupTypeEdit = document.querySelector(".popup_type_edit");
 
 const nameInput = document.querySelector(".popup__input_type_card-name");
 const jobInput = document.querySelector(".popup__input_type_url");
-const formElementEditProfile = document.querySelector(".popup__form");
+const formBigElementEditProfile = document.querySelector(".popup__form");
 const popupInputTypeName = document.querySelector(".popup__input_type_name");
 const popupInputTypeDescription = document.querySelector(
   ".popup__input_type_description"
@@ -26,6 +27,8 @@ const editForm = document.querySelector('form[name="edit-profile"]');
 
 const formNewCard = document.querySelector('form[name="new-place"]');
 
+const popupOverlayElse = document.querySelectorAll(".popup");
+
 function updateProfileInfo(name, description) {
   profileTitle.textContent = name;
   profileDescription.textContent = description;
@@ -36,7 +39,7 @@ function fillEditProfileForm() {
   popupInputTypeDescription.value = profileDescription.textContent;
 }
 
-function handleFormSubmitTag(evt) {
+function handleEditProfileFormSubmit(evt) {
   evt.preventDefault();
 
   const nameValue = nameInput.value;
@@ -46,11 +49,9 @@ function handleFormSubmitTag(evt) {
   profileDescription.textContent = jobValue;
 
   updateProfileInfo(nameValue, jobValue);
-
-  closeActivePopup();
 }
 
-formElementEditProfile.addEventListener("submit", handleFormSubmitTag);
+formBigElementEditProfile.addEventListener("submit", handleEditProfileFormSubmit);
 
 editForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
@@ -60,8 +61,16 @@ editForm.addEventListener("submit", (evt) => {
 
   updateProfileInfo(nameValue, jobValue);
 
-  closeActivePopup();
+  closePopup(document.querySelector(".popup_is-opened"));
 });
+
+function cardImgHandler(data) {
+  openPopup(profilePopupTypeImage);
+  profilePopupTypeImage.querySelector("img").src = data.link;
+  profilePopupTypeImage.querySelector(".popup__caption").textContent =
+    data.name;
+  profilePopupTypeImage.querySelector("img").alt = data.name;
+}
 
 function renderCards() {
   const placesList = document.querySelector(".places__list");
@@ -73,7 +82,7 @@ function renderCards() {
       function (element) {
         element.remove();
       },
-      profilePopupTypeImage
+      cardImgHandler
     );
     placesList.insertBefore(cardElement, placesList.firstChild);
   });
@@ -90,7 +99,11 @@ profilePopupEditButton.addEventListener("click", () => {
   fillEditProfileForm();
 });
 
-popupCloseBtnElements.forEach((b) => b.addEventListener("click", closeActivePopup));
+popupCloseBtnElements.forEach((b) =>
+  b.addEventListener("click", () =>
+    closePopup(document.querySelector(".popup_is-opened"))
+  )
+);
 
 formNewCard.addEventListener("submit", (evt) => {
   evt.preventDefault();
@@ -103,18 +116,28 @@ formNewCard.addEventListener("submit", (evt) => {
     link: cardUrl,
   };
 
-  const onDelete = (element) => {
-    element.remove();
-  };
-
-  const newCardElement = createCard(newCardData, likeHandler, onDelete, profilePopupTypeImage);
+  const newCardElement = createCard(
+    newCardData,
+    likeHandler,
+    onDelete,
+    cardImgHandler
+  );
 
   const placesList = document.querySelector(".places__list");
 
   placesList.insertBefore(newCardElement, placesList.firstChild);
 
-  closeActivePopup();
+  closePopup(document.querySelector(".popup_is-opened"));
 
   nameInput.value = "";
   jobInput.value = "";
 });
+
+popupOverlayElse.forEach((overlay) =>
+  overlay.addEventListener("click", (evt) => {
+    if (evt.target == overlay) {
+      closePopup(document.querySelector(".popup_is-opened"));
+    }
+    /*console.log(evt.composedPath().some(el=>el.classList.contains('popup__content')))*/
+  })
+);
