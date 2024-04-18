@@ -1,6 +1,4 @@
 // card.js
-
-
 export function createCard(data, likeHandler, onDelete, imgHandler) {
   const cardTemplate = document
     .querySelector("#card-template")
@@ -23,12 +21,6 @@ export function createCard(data, likeHandler, onDelete, imgHandler) {
   likeButton.addEventListener("click", () => {
     likeHandler(likeButton);
   });
-
-  /*image.addEventListener("click", () => {
-    openPopup(captionElement);
-    captionElement.querySelector("img").src = data.link;
-    captionElement.querySelector(".popup__caption").textContent = data.name;
-  });*/
 
   image.addEventListener('click',( )=>{
     imgHandler(data)

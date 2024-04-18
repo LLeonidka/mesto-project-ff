@@ -138,6 +138,5 @@ popupOverlayElse.forEach((overlay) =>
     if (evt.target == overlay) {
       closePopup(document.querySelector(".popup_is-opened"));
     }
-    /*console.log(evt.composedPath().some(el=>el.classList.contains('popup__content')))*/
   })
 );
