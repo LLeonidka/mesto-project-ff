@@ -15,7 +15,7 @@ const profilePopupTypeEdit = document.querySelector(".popup_type_edit");
 
 const nameInput = document.querySelector(".popup__input_type_card-name");
 const jobInput = document.querySelector(".popup__input_type_url");
-const formBigElementEditProfile = document.querySelector(".popup__form");
+const formBigElementEditProfile = document.querySelector('form[name="edit-profile"]');
 const popupInputTypeName = document.querySelector(".popup__input_type_name");
 const popupInputTypeDescription = document.querySelector(
   ".popup__input_type_description"
