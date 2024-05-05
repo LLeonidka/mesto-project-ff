@@ -29,3 +29,10 @@
 .form__submit_inactive{
   background: rgba(0, 0, 0, 0.15);
 }
+
+.popup__button_disabled {
+  pointer-events: none;
+  background-color: #fff;
+  color: #c4c4c4;
+  border: solid 1px #c4c4c4;
+}

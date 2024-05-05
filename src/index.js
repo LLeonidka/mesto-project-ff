@@ -1,7 +1,7 @@
 // index.js
 import "./pages/index.css";
 import initialCards from "./components/cards.js";
-import { createCard, likeHandler } from "./components/card.js";
+import { createCard} from "./components/card.js";
 import { openPopup, closePopup } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validate.js";
 import {
@@ -10,7 +10,7 @@ import {
   getCards,
   addCard,
   cardDelete,
-  changeAvtar,
+  changeAvtar, putLike, removeLike
 } from "./components/api.js";
 
 export const profilePopupTypeImage =
@@ -22,8 +22,8 @@ const popupCloseBtnElements = document.querySelectorAll(".popup__close");
 const profilePopupEditButton = document.querySelector(".profile__edit-button");
 const profilePopupTypeEdit = document.querySelector(".popup_type_edit");
 
-const nameInput = document.querySelector(".popup__input_type_card-name");
-const jobInput = document.querySelector(".popup__input_type_url");
+const nameInput = profilePopup.querySelector(".popup__input_type_card-name");
+const cardLinkInput = profilePopup.querySelector(".popup__input_type_url");
 const formBigElementEditProfile = document.querySelector(
   'form[name="edit-profile"]'
 );
@@ -47,6 +47,12 @@ const formNewCard = document.querySelector('form[name="new-place"]');
 
 const popupOverlayElse = document.querySelectorAll(".popup");
 
+const popupImageEl = profilePopupTypeImage.querySelector("img")
+const popupImageCaptionEl = profilePopupTypeImage.querySelector(".popup__caption")
+const placesList = document.querySelector(".places__list");
+
+let userId ;
+
 function updateProfileInfo(name, description) {
   profileTitle.textContent = name;
   profileDescription.textContent = description;
@@ -64,7 +70,6 @@ function changeAvatar(url) {
 popupTupeAvatarForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
   const imageValue = formInputAvatar.value;
-  console.log(imageValue);
   popupTupeAvatarForm.querySelector(".button").textContent = "Сохранение...";
   changeAvtar(imageValue)
     .then((res) => {
@@ -79,7 +84,6 @@ popupTupeAvatarForm.addEventListener("submit", (evt) => {
     });
 });
 
-
 editForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
   const nameValue = popupInputTypeName.value;
@@ -87,7 +91,7 @@ editForm.addEventListener("submit", (evt) => {
   editForm.querySelector(".button").textContent = "Сохранение...";
   saveProfileInfo(nameValue, jobValue)
     .then((result) => {
-      closePopup(document.querySelector(".popup_is-opened"));
+      closePopup(profilePopupTypeEdit);
       updateProfileInfo(nameValue, jobValue);
       console.log(result);
     })
@@ -101,30 +105,55 @@ editForm.addEventListener("submit", (evt) => {
 
 function cardImgHandler(data) {
   openPopup(profilePopupTypeImage);
-  profilePopupTypeImage.querySelector("img").src = data.link;
-  profilePopupTypeImage.querySelector(".popup__caption").textContent =
+  popupImageEl.src = data.link;
+  popupImageCaptionEl.textContent =
     data.name;
-  profilePopupTypeImage.querySelector("img").alt = data.name;
+  popupImageEl.alt = data.name;
+}
+
+function likeHandler(cardId, likeButton) {
+  let isLiked = likeButton.classList.contains("card__like-button_is-active");
+
+  if (!isLiked) {
+    putLike(cardId)
+      .then((result) => {
+        likeButton.classList.add("card__like-button_is-active");
+        console.log(result);
+        likeButton.nextElementSibling.textContent = result.likes.length;
+      })
+      .catch((err) => {
+        console.log(err); // выводим ошибку в консоль
+      });
+  } else {
+    removeLike(cardId)
+      .then((result) => {
+        likeButton.classList.remove("card__like-button_is-active");
+        console.log(result);
+        likeButton.nextElementSibling.textContent = result.likes.length;
+      })
+      .catch((err) => {
+        console.log(err); // выводим ошибку в консоль
+      });
+  }
 }
 
 function renderCards(data) {
-  const placesList = document.querySelector(".places__list");
   placesList.innerHTML = "";
   data.forEach(function (cardData) {
     const cardElement = createCard(
       cardData,
+      likeHandler,
       function (element) {
-        element.classList.toggle("card__like-button_is-active");
-      },
-      function (element) {
-        cardDelete(cardData._id).then((result) => {
-          console.log(result);
-          element.remove();
-        });
+        cardDelete(cardData._id)
+          .then((result) => {
+            element.remove();
+          })
+          .catch((err) => {
+            console.log(err); // Обработка ошибок
+          });
       },
       cardImgHandler
-    );
-    console.log(cardElement);
+    )
     placesList.append(cardElement);
   });
 }
@@ -174,28 +203,34 @@ profileImageContainer.addEventListener("click", () => {
   });
 });
 
-
 formNewCard.addEventListener("submit", (evt) => {
   evt.preventDefault();
 
   const cardName = nameInput.value;
-  const cardUrl = jobInput.value;
+  const cardUrl = cardLinkInput.value;
   formNewCard.querySelector(".button").textContent = "Сохранение...";
   addCard(cardName, cardUrl).then((data) => {
-    closePopup(document.querySelector(".popup_is-opened"));
+    closePopup(profilePopup);
 
     nameInput.value = "";
-    jobInput.value = "";
-    getCards()
-      .then((data) => {
-        renderCards(data);
-      })
-      .catch((err) => {
-        console.log(err); // выводим ошибку в консоль
-      })
-      .finally(() => {
-        formNewCard.querySelector(".button").textContent = "Сохранить";
-      });
+    cardLinkInput.value = "";
+    formNewCard.querySelector(".button").textContent = "Сохранить";
+    const cardElement = createCard(
+      data,
+      likeHandler,
+      function (element) {
+        cardDelete(cardData._id)
+          .then((result) => {
+            element.remove();
+          })
+          .catch((err) => {
+            console.log(err); // Обработка ошибок
+          });
+      },
+      cardImgHandler
+    )
+    console.log(cardElement)
+    placesList.prepend(cardElement);
   });
 });
 
@@ -207,18 +242,26 @@ popupOverlayElse.forEach((overlay) =>
   })
 );
 
-getProfileInfo()
-  .then(({ name, about }) => {
-    updateProfileInfo(name, about);
-  })
-  .catch((err) => {
-    console.log(err); // выводим ошибку в консоль
-  });
 
-getCards()
-  .then((data) => {
-    renderCards(data);
-  })
-  .catch((err) => {
-    console.log(err); // выводим ошибку в консоль
-  });
+Promise.all([getProfileInfo(), getCards()])
+.then(([userData, cardsData]) => {
+//Здесь устанавливаем данные пользователя и рисуем карточки
+// а так же сохраняем id пользователя в глобальную переменную
+userId = userData._id;
+updateProfileInfo(userData.name, userData.about);
+renderCards(cardsData);
+//userId должна быть объявлена вне блока Promise.all, чтобы мы имели возможность передавать её в createCard при создании карточки.
+})
+.catch((err) => {
+      console.log(err); // выводим ошибку в консоль
+    });
+
+
+
+
+
+
+
+
+
+
