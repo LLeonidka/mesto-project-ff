@@ -1,7 +1,7 @@
 // index.js
 import "./pages/index.css";
 import initialCards from "./components/cards.js";
-import { createCard} from "./components/card.js";
+import { createCard } from "./components/card.js";
 import { openPopup, closePopup } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validate.js";
 import {
@@ -10,7 +10,9 @@ import {
   getCards,
   addCard,
   cardDelete,
-  changeAvtar, putLike, removeLike
+  changeAvtar,
+  putLike,
+  removeLike,
 } from "./components/api.js";
 
 export const profilePopupTypeImage =
@@ -47,11 +49,12 @@ const formNewCard = document.querySelector('form[name="new-place"]');
 
 const popupOverlayElse = document.querySelectorAll(".popup");
 
-const popupImageEl = profilePopupTypeImage.querySelector("img")
-const popupImageCaptionEl = profilePopupTypeImage.querySelector(".popup__caption")
+const popupImageEl = profilePopupTypeImage.querySelector("img");
+const popupImageCaptionEl =
+  profilePopupTypeImage.querySelector(".popup__caption");
 const placesList = document.querySelector(".places__list");
 
-let userId ;
+let userId;
 
 function updateProfileInfo(name, description) {
   profileTitle.textContent = name;
@@ -106,8 +109,7 @@ editForm.addEventListener("submit", (evt) => {
 function cardImgHandler(data) {
   openPopup(profilePopupTypeImage);
   popupImageEl.src = data.link;
-  popupImageCaptionEl.textContent =
-    data.name;
+  popupImageCaptionEl.textContent = data.name;
   popupImageEl.alt = data.name;
 }
 
@@ -152,8 +154,9 @@ function renderCards(data) {
             console.log(err); // Обработка ошибок
           });
       },
-      cardImgHandler
-    )
+      cardImgHandler,
+      userId
+    );
     placesList.append(cardElement);
   });
 }
@@ -218,6 +221,7 @@ formNewCard.addEventListener("submit", (evt) => {
     const cardElement = createCard(
       data,
       likeHandler,
+      userId,
       function (element) {
         cardDelete(cardData._id)
           .then((result) => {
@@ -228,8 +232,8 @@ formNewCard.addEventListener("submit", (evt) => {
           });
       },
       cardImgHandler
-    )
-    console.log(cardElement)
+    );
+    console.log(cardElement);
     placesList.prepend(cardElement);
   });
 });
@@ -242,26 +246,15 @@ popupOverlayElse.forEach((overlay) =>
   })
 );
 
-
 Promise.all([getProfileInfo(), getCards()])
-.then(([userData, cardsData]) => {
-//Здесь устанавливаем данные пользователя и рисуем карточки
-// а так же сохраняем id пользователя в глобальную переменную
-userId = userData._id;
-updateProfileInfo(userData.name, userData.about);
-renderCards(cardsData);
-//userId должна быть объявлена вне блока Promise.all, чтобы мы имели возможность передавать её в createCard при создании карточки.
-})
-.catch((err) => {
-      console.log(err); // выводим ошибку в консоль
-    });
-
-
-
-
-
-
-
-
-
-
+  .then(([userData, cardsData]) => {
+    //Здесь устанавливаем данные пользователя и рисуем карточки
+    // а так же сохраняем id пользователя в глобальную переменную
+    userId = userData._id;
+    updateProfileInfo(userData.name, userData.about);
+    renderCards(cardsData);
+    //userId должна быть объявлена вне блока Promise.all, чтобы мы имели возможность передавать её в createCard при создании карточки.
+  })
+  .catch((err) => {
+    console.log(err); // выводим ошибку в консоль
+  });

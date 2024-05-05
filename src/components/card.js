@@ -30,7 +30,6 @@ const ownerId = data.owner._id
     if (data.likes.find((user) => user._id === currentUserId)) {
       likeButton.classList.toggle("card__like-button_is-active");
       isLiked = true;
-      likeCounter.textContent = data.likes.length;
     }
   // });
 
