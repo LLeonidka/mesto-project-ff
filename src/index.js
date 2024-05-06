@@ -221,9 +221,8 @@ formNewCard.addEventListener("submit", (evt) => {
     const cardElement = createCard(
       data,
       likeHandler,
-      userId,
       function (element) {
-        cardDelete(cardData._id)
+        cardDelete(data._id)
           .then((result) => {
             element.remove();
           })
@@ -232,20 +231,12 @@ formNewCard.addEventListener("submit", (evt) => {
           });
       },
       cardImgHandler,
-      userId
+      userId // Передаем userId как последний аргумент
     );
     console.log(cardElement);
     placesList.prepend(cardElement);
   });
 });
-
-popupOverlayElse.forEach((overlay) =>
-  overlay.addEventListener("click", (evt) => {
-    if (evt.target == overlay) {
-      closePopup(document.querySelector(".popup_is-opened"));
-    }
-  })
-);
 
 Promise.all([getProfileInfo(), getCards()])
   .then(([userData, cardsData]) => {
