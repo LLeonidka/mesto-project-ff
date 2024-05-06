@@ -231,7 +231,8 @@ formNewCard.addEventListener("submit", (evt) => {
             console.log(err); // Обработка ошибок
           });
       },
-      cardImgHandler
+      cardImgHandler,
+      userId
     );
     console.log(cardElement);
     placesList.prepend(cardElement);
